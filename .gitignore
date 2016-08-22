@@ -49,3 +49,4 @@ Temporary Items
 #Alperen
 .idea
 test.py
+__pycache__

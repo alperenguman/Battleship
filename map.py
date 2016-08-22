@@ -1,5 +1,8 @@
 class Map:
 
+    def __init__(self):
+        self.setup_map()
+
     def setup_map(self):
         map_size = input("Select map size [S]mall [M]edium or [L]arge]")
         if map_size.lower()== 's':
@@ -10,8 +13,10 @@ class Map:
             self.create_map(15)
 
     def create_map(self, *kwargs):
-        setattr('key','value', 10)
-        pass
+        self.map_size = 10
+        for key, value in kwargs.items():
+            setattr(self, key, value)
+        return(self.map_size)
 
     def print_map(self):
         pass
