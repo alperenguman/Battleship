@@ -70,17 +70,15 @@ class Map:
 
         if placement is not None:
             pass
+
         else:
             placement = input("\nWhere do you want to put your ship? (Type Column/Row i.e C3) ").lower()
 
-        placement_formatted = (placement[0], int(placement[1]))
-
-        if placement_formatted not in self.coordinates_dict:
-            print("Sorry that's not a coordinate on the map.")
-            Map.place_ship(self)
-        else:
-            self.ship_positions.append(placement_formatted)
+            placement_formatted = (placement[0], int(placement[1]))
+            Map.placement_check(self, placement_formatted)
+            Map.placement_orientation(self, placement_formatted)
             self.coordinates_dict[placement_formatted] = 'SHIP'
+            self.ship_positions.append(placement_formatted)
 
         Map.map_display(self)
 
@@ -95,6 +93,41 @@ class Map:
             Map.remove_last(self)
 
             self.place_ship(placement=response)
+
+    def placement_orientation(self, placement):
+        orientation = input("\nDo you want to place your ship [V]ertically or [H]orizontally? ").lower()
+        if orientation == 'h':
+            X1 = (self.columns[self.columns.index(placement[0])+1], placement[1])
+            X3 = (self.columns[self.columns.index(placement[0])-1], placement[1])
+            Map.placement_check(self, X1)
+            Map.placement_check(self, X3)
+            self.coordinates_dict[X1] = 'SHIP'
+            self.coordinates_dict[X3] = 'SHIP'
+            Map.map_display(self)
+
+        elif orientation == 'v':
+            Y1 = (placement[0],placement[1]+1)
+            Y3 = (placement[0],placement[1]-1)
+            Map.placement_check(self, Y1)
+            Map.placement_check(self, Y3)
+            self.coordinates_dict[Y1] = 'SHIP'
+            self.coordinates_dict[Y3] = 'SHIP'
+        else:
+            Map.placement_orientation(self)
+
+    def placement_check(self, placed_point):
+
+        if placed_point not in self.coordinates:
+            print("Sorry you're trying to place the ship out of"
+                  " the bounds of the map.")
+            Map.place_ship(self)
+            #insert logger
+        elif self.coordinates_dict[placed_point] != 'EMPTY':
+            print("Sorry your placement intersects another ship.")
+            Map.place_ship(self)
+            #insert logger
+        else:
+            pass
 
     def remove_last(self):
         last_p = self.ship_positions.pop()

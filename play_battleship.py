@@ -26,7 +26,7 @@ if __name__ == "__main__":
 
     player1 = Player()
 
-    player1_map = Map(owner=player1)
+    player1_map = Map(owner=player1.name)
     player1_map.map_display()
     player1_map.place_ship()
     clear()
