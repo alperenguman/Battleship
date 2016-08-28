@@ -1,12 +1,18 @@
-class Map:
+import logging
 
+
+class Map:
+    owner = None
     size = 10
     rows = None
     columns = None
     coordinates = None
     coordinates_dict = None
+    ship_positions = []
+    removed = []
 
     def __init__(self, **kwargs):
+
         for key, value in kwargs.items():
             setattr(self, key, value)
         Map.setup_map(self)
@@ -27,8 +33,6 @@ class Map:
         self.coordinates_dict = {}
         for items in self.coordinates:
             self.coordinates_dict[items]="EMPTY"
-
-        self.coordinates_dict[('j', 10)] = "FULL"
 
     def map_display(self):
 
@@ -57,23 +61,44 @@ class Map:
         print('\n', '  ', ' '.join(self.columns).upper())
         print('', ' '.join(map_display))
 
-    def change_map(self, **kwargs):
+    def place_ship(self, **kwargs):
+        placement = None
 
         for key, value in kwargs.items():
-            if key in self.coordinates:
-                self.coordinates_dict[key] = value
-            else:
-                setattr(self, key, value)
+            if key == 'placement':
+                placement = value
 
-        Map.map_display(self)
+        if placement is not None:
+            pass
+        else:
+            placement = input("\nWhere do you want to put your ship? (Type Column/Row i.e C3) ").lower()
 
-    def place_ship(self):
-
-        placement = input("\nWhere do you want to put your ship? (Type Column/Row i.e C3) ").lower()
         placement_formatted = (placement[0], int(placement[1]))
 
         if placement_formatted not in self.coordinates_dict:
             print("Sorry that's not a coordinate on the map.")
             Map.place_ship(self)
         else:
+            self.ship_positions.append(placement_formatted)
             self.coordinates_dict[placement_formatted] = 'SHIP'
+
+        Map.map_display(self)
+
+        logging.info("Position {} is marked by {} for ship placement.".format(self.ship_positions[-1], self.owner))
+
+        response = input('are you sure {}? Press [Y]es to continue'
+                         ' or enter other value correct what you just did '.format(self.owner))
+
+        if response.lower() == 'y':
+            pass
+        else:
+            Map.remove_last(self)
+
+            self.place_ship(placement=response)
+
+    def remove_last(self):
+        last_p = self.ship_positions.pop()
+        self.coordinates_dict[last_p] = 'EMPTY'
+        self.removed.append(last_p)
+        logging.info("Ship placement {} removed by {}".format(last_p, self.owner))
+        self.map_display()

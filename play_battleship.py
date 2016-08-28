@@ -1,8 +1,13 @@
 from map import Map
+from player import Player
 import player
 import ship
 import sys
 import os
+import logging
+
+logging.basicConfig(filename='battleship.log', level=logging.DEBUG)
+
 
 def clear():
     if sys.platform == 'win32':
@@ -10,21 +15,23 @@ def clear():
     else:
         os.system("clear")
 
+
 def pass_laptop():
     clear()
     input("{} please pass the game to {} and press any key"
-          " when you're ready to continue".format(player1,player2))
+          " when you're ready to continue".format(player1.name, player2.name))
     clear()
 
 if __name__ == "__main__":
 
-    player1 = player.Player()
-    clear()
-    player1map = Map()
-    player1map.map_display()
-    captured_coordinate = player1map.place_ship()
-    player1map.change_map(alperen='guman')
+    player1 = Player()
 
-    player2 = "Player 2"
-    pass_laptop()
+    player1_map = Map(owner=player1)
+    player1_map.map_display()
+    player1_map.place_ship()
+    clear()
+
+    input("{} please pass the game to {} and press any key"
+          " when you're ready to continue".format(player1.name, 'Player 2'))
+
     player2 = player.Player()

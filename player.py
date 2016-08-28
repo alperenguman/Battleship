@@ -14,7 +14,4 @@ class Player:
         self.get_name()
 
     def __str__(self):
-        return(self.name)
-
-
-
+        return("{}: {}".format(__class__.__name__, self.name))
