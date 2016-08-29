@@ -1,4 +1,6 @@
 import logging
+import sys
+import os
 
 
 class Map:
@@ -10,6 +12,13 @@ class Map:
     coordinates_dict = None
     ship_positions = []
     removed = []
+
+    @staticmethod
+    def clear():
+        if sys.platform == 'win32':
+            os.system("cls")
+        else:
+            os.system("clear")
 
     def __init__(self, **kwargs):
 
@@ -44,7 +53,7 @@ class Map:
         for item in self.coordinates:
             n += 1
             if self.coordinates_dict[item] == "EMPTY" and n % len(self.columns) == 0 and m < len(self.rows):
-                map_display.append('0')
+                map_display.append('O')
                 map_display.append('\n')
                 if self.rows[m] < 10:
                     map_display.append(' '+str(self.rows[m]))
@@ -52,10 +61,14 @@ class Map:
                     map_display.append(str(self.rows[m]))
                 m += 1
             elif self.coordinates_dict[item] == "EMPTY" and n % len(self.columns) == 0:
-                map_display.append('0')
+                map_display.append('O')
                 map_display.append('\n')
             elif self.coordinates_dict[item] == "EMPTY":
-                map_display.append('0')
+                map_display.append('O')
+            elif self.coordinates_dict[item] == "SHIP_H":
+                map_display.append('-')
+            elif self.coordinates_dict[item] == "SHIP_V":
+                map_display.append('|')
             else:
                 map_display.append('1')
         print('\n', '  ', ' '.join(self.columns).upper())
@@ -74,44 +87,50 @@ class Map:
         else:
             placement = input("\nWhere do you want to put your ship? (Type Column/Row i.e C3) ").lower()
 
-            placement_formatted = (placement[0], int(placement[1]))
-            Map.placement_check(self, placement_formatted)
-            Map.placement_orientation(self, placement_formatted)
-            self.coordinates_dict[placement_formatted] = 'SHIP'
-            self.ship_positions.append(placement_formatted)
+        placement_formatted = (placement[0], int(placement[1]))
+        Map.placement_orientation(self, placement_formatted)
 
+        Map.clear()
         Map.map_display(self)
-
         logging.info("Position {} is marked by {} for ship placement.".format(self.ship_positions[-1], self.owner))
-
-        response = input('are you sure {}? Press [Y]es to continue'
-                         ' or enter other value correct what you just did '.format(self.owner))
+        response = input('Are you sure {}? Press [Y]es to continue'
+                         ' or enter another value correct what you just did. '.format(self.owner))
 
         if response.lower() == 'y':
             pass
         else:
             Map.remove_last(self)
-
             self.place_ship(placement=response)
 
     def placement_orientation(self, placement):
-        orientation = input("\nDo you want to place your ship [V]ertically or [H]orizontally? ").lower()
+        orientation = input("Do you want to place your ship [V]ertically or [H]orizontally? ").lower()
         if orientation == 'h':
             X1 = (self.columns[self.columns.index(placement[0])+1], placement[1])
+            X2 = (self.columns[self.columns.index(placement[0])], placement[1])
             X3 = (self.columns[self.columns.index(placement[0])-1], placement[1])
             Map.placement_check(self, X1)
+            Map.placement_check(self, X2)
             Map.placement_check(self, X3)
-            self.coordinates_dict[X1] = 'SHIP'
-            self.coordinates_dict[X3] = 'SHIP'
-            Map.map_display(self)
+            self.coordinates_dict[X1] = 'SHIP_H'
+            self.coordinates_dict[X2] = 'SHIP_H'
+            self.coordinates_dict[X3] = 'SHIP_H'
+            self.ship_positions.append(X1)
+            self.ship_positions.append(X2)
+            self.ship_positions.append(X3)
 
         elif orientation == 'v':
             Y1 = (placement[0],placement[1]+1)
+            Y2 = (placement[0],placement[1])
             Y3 = (placement[0],placement[1]-1)
             Map.placement_check(self, Y1)
+            Map.placement_check(self, Y2)
             Map.placement_check(self, Y3)
-            self.coordinates_dict[Y1] = 'SHIP'
-            self.coordinates_dict[Y3] = 'SHIP'
+            self.coordinates_dict[Y1] = 'SHIP_V'
+            self.coordinates_dict[Y2] = 'SHIP_V'
+            self.coordinates_dict[Y3] = 'SHIP_V'
+            self.ship_positions.append(Y1)
+            self.ship_positions.append(Y2)
+            self.ship_positions.append(Y3)
         else:
             Map.placement_orientation(self)
 
@@ -130,8 +149,10 @@ class Map:
             pass
 
     def remove_last(self):
-        last_p = self.ship_positions.pop()
-        self.coordinates_dict[last_p] = 'EMPTY'
-        self.removed.append(last_p)
-        logging.info("Ship placement {} removed by {}".format(last_p, self.owner))
-        self.map_display()
+        n = 3
+        while n > 0:
+            last_p = self.ship_positions.pop()
+            self.coordinates_dict[last_p] = 'EMPTY'
+            self.removed.append(last_p)
+            logging.info("Ship placement {} removed by {}".format(last_p, self.owner))
+            n -= 1
