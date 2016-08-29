@@ -74,9 +74,9 @@ class Map:
         print('\n', '  ', ' '.join(self.columns).upper())
         print('', ' '.join(map_display))
 
-    def place_ship(self, **kwargs):
+    def place_ship(self, ship, **kwargs):
         placement = None
-
+        print(ship.size)
         for key, value in kwargs.items():
             if key == 'placement':
                 placement = value

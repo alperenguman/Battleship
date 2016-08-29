@@ -24,15 +24,24 @@ def pass_laptop():
 
 
 def choose_ship():
-    clear()
-    ship_chosen = input("[A]ircraft Carrier (Size: 5)\n"
+    response = input("[A]ircraft Carrier (Size: 5)\n"
                         "[B]attleship, (Size:4)\n"
                         "[C]ruiser (Size: 3)\n"
                         "[S]ubmarine (Size: 3)\n"
-                        "[P]atrol Boat (Size: 2)\n"
+                        "[P]atrol Boat (Size: 2)\n\n"
                         "Please select a ship to place: ")
-    if ship_chosen.lower() == 'a':
-        
+    if response.lower() == 'a':
+        return ship.AircraftCarrier()
+    elif response.lower() == 'b':
+        return ship.Battleship()
+    elif response.lower() == 'c':
+        return ship.Cruiser()
+    elif response.lower() == 's':
+        return ship.Submarine()
+    elif response.lower() == 'p':
+        return ship.PatrolBoat()
+    else:
+        choose_ship()
 
 if __name__ == "__main__":
 
@@ -40,7 +49,7 @@ if __name__ == "__main__":
     clear()
     player1_map = Map(owner=player1.name)
     player1_map.map_display()
-    player1_map.place_ship()
+    player1_map.place_ship(choose_ship())
     clear()
 
     input("{} please pass the game to {} and press any key"
