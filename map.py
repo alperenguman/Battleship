@@ -1,6 +1,7 @@
 import logging
 import sys
 import os
+import string
 import ship
 import pdb
 
@@ -29,9 +30,7 @@ class Map:
         Map.setup_map(self)
 
     def setup_map(self):
-        columns_letters = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i',
-                           'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r',
-                           's', 't', 'u', 'v', 'w', 'x', 'y', 'z']
+        columns_letters = list(string.ascii_lowercase)
         self.columns = columns_letters[0:self.size]
         numbers = range(1, self.size+1)
         self.rows = [n for n in numbers]
@@ -104,8 +103,15 @@ class Map:
 
                 placement = input("\nWhere do you want to put your {}?"
                                   " (Type Column/Row i.e C3) ".format(selected_ship.name)).lower()
+        if len(placement) == 2 and placement[0] in list(string.ascii_lowercase)[:self.size] and int(placement[1]) < self.size:
+            placement_formatted = (placement[0], int(placement[1]))
+        elif len(placement) == 3:
+            placement_formatted = (placement[0], int(placement[1]+placement[2]))
+        else:
+            print("Please check your formatting")
+            self.place_ship(ship=selected_ship)
 
-        placement_formatted = (placement[0], int(placement[1]))
+
         Map.placement_orientation(self, placement_formatted, selected_ship)
 
         Map.clear()
@@ -124,11 +130,11 @@ class Map:
             else:
                 self.clear()
                 self.map_display()
-                print("Moving on!\n")
+                print("Success!\n")
         except IndexError:
             self.clear()
             self.map_display()
-            print("Moving on!\n")
+            print("Success!\n")
 
     def placement_orientation(self, placement, selected_ship):
 
@@ -169,24 +175,29 @@ class Map:
                 self.coordinates_dict[coordinate] = 'SHIP_H_'+selected_ship.name
                 self.ship_positions.append(coordinate)
 
-
         elif orientation == 'v':
 
-            # MIRROR WHAT YOU'VE DONE FOR HORIZONTAL
+            y_list = []
+            successful_check = True
 
-            ship_pos=['Y'+str(n) for n in points]
-            Y1 = (placement[0],placement[1]+1)
-            Y2 = (placement[0],placement[1])
-            Y3 = (placement[0],placement[1]-1)
-            Map.placement_check(self, Y1)
-            Map.placement_check(self, Y2)
-            Map.placement_check(self, Y3)
-            self.coordinates_dict[Y1] = 'SHIP_V'
-            self.coordinates_dict[Y2] = 'SHIP_V'
-            self.coordinates_dict[Y3] = 'SHIP_V'
-            self.ship_positions.append(Y1)
-            self.ship_positions.append(Y2)
-            self.ship_positions.append(Y3)
+            for item in coords:
+                if self.rows.index(placement[1])+item < 0 or self.rows.index(placement[1])+item > self.size:
+                    successful_check = False
+                    break
+
+            if successful_check:
+                for item in coords:
+                    y_list.append((placement[0], self.rows[self.rows.index(placement[1])+item]))
+            else:
+                print("Your placement is out of bounds. ")
+                Map.place_ship(self, ship=selected_ship)
+
+            for coordinate in y_list:
+
+                Map.placement_check(self, coordinate, selected_ship)
+                self.coordinates_dict[coordinate] = 'SHIP_V_'+selected_ship.name
+                self.ship_positions.append(coordinate)
+
         else:
             Map.placement_orientation(self)
 

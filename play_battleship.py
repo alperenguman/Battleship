@@ -22,16 +22,12 @@ def pass_laptop():
           " when you're ready to continue".format(player1.name, player2.name))
     clear()
 
-def choose_ship(map):
-    for item in map.ship_placed:
-        if item.name in ["Aircraft Carrier", "Battleship",
-                         "Cruiser", "Submarine", "Patrol Boat"]:
-            print(item.name, "\n")
-        else:
-            continue
+def choose_ship(which_map):
 
-    response = input("[A]ircraft Carrier (Size: 5)\n"
-                     "[B]attleship, (Size:4)\n"
+    a_placed = ("Aircraft Carrier" in [item.name for item in which_map.ship_placed])
+    b_placed = ("Battleship" in [item.name for item in which_map.ship_placed])
+    response = input("[A]ircraft Carrier (Size: 5)" + "."*3*a_placed+"PLACED"*a_placed+"\n"
+                     "[B]attleship, (Size:4)"+"."*9*b_placed+"PLACED"*b_placed+"\n"
                      "[C]ruiser (Size: 3)\n"
                      "[S]ubmarine (Size: 3)\n"
                      "[P]atrol Boat (Size: 2)\n\n"
