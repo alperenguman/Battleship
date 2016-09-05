@@ -5,6 +5,7 @@ import string
 import ship
 import pdb
 
+
 class Map:
     owner = None
     size = 10
@@ -42,7 +43,7 @@ class Map:
 
         self.coordinates_dict = {}
         for items in self.coordinates:
-            self.coordinates_dict[items]="EMPTY"
+            self.coordinates_dict[items] = "EMPTY"
 
     def map_display(self):
 
@@ -51,6 +52,7 @@ class Map:
         m = 0
         map_display.append(' '+str(self.rows[m]))
         m = 1
+
         for item in self.coordinates:
             n += 1
             if self.coordinates_dict[item] == "EMPTY" and n % len(self.columns) == 0 and m < len(self.rows):
@@ -68,6 +70,17 @@ class Map:
                 map_display.append('O')
             elif self.coordinates_dict[item][5] == "H":
                 map_display.append('-')
+            elif self.coordinates_dict[item][5] == "V" and n % len(self.columns) == 0 and m < len(self.rows):
+                map_display.append('|')
+                map_display.append('\n')
+                if self.rows[m] < 10:
+                    map_display.append(' '+str(self.rows[m]))
+                else:
+                    map_display.append(str(self.rows[m]))
+                m += 1
+            elif self.coordinates_dict[item][5] == "V" and n % len(self.columns) == 0:
+                map_display.append('|')
+                map_display.append('\n')
             elif self.coordinates_dict[item][5] == "V":
                 map_display.append('|')
             else:
@@ -88,6 +101,7 @@ class Map:
                 selected_ship = self.ship_placed[-1]
 
             elif key == 'ship':
+
                 ship_placed_string = [n.name for n in self.ship_placed]
                 if value.name in ship_placed_string:
                     selected_ship = self.ship_placed[ship_placed_string.index(value.name)]
@@ -111,7 +125,6 @@ class Map:
             print("Please check your formatting")
             self.place_ship(ship=selected_ship)
 
-
         Map.placement_orientation(self, placement_formatted, selected_ship)
 
         Map.clear()
@@ -125,7 +138,7 @@ class Map:
         try:
             response_formatted = (response[0], int(response[1]))
             if response_formatted in self.coordinates:
-                Map.remove_last(self, selected_ship.size)
+                self.remove_ship(selected_ship)
                 self.place_ship(placement=response)
             else:
                 self.clear()
@@ -182,8 +195,8 @@ class Map:
 
             for item in coords:
                 if self.rows.index(placement[1])+item < 0 or self.rows.index(placement[1])+item > self.size:
-                    successful_check = False
-                    break
+                        successful_check = False
+                        break
 
             if successful_check:
                 for item in coords:
@@ -203,8 +216,6 @@ class Map:
 
     def placement_check(self, coordinate, selected_ship):
 
-        # CHECK FOR EVERY POINT OF SHIP NOT ONLY CENTER
-
         if coordinate not in self.coordinates:
             print("Sorry, you're trying to place the ship outside"
                   " the bounds of the map.")
@@ -218,13 +229,6 @@ class Map:
         else:
             pass
 
-    def remove_last(self, ship_size):
-        while ship_size > 0:
-            last_p = self.ship_positions.pop()
-            self.coordinates_dict[last_p] = 'EMPTY'
-            self.removed.append(last_p)
-            logging.info("Ship placement {} removed by {}".format(last_p, self.owner))
-            ship_size -= 1
 
     def remove_ship(self, ship):
 
