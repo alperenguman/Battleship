@@ -1,7 +1,7 @@
 import logging
 import sys
 import os
-
+import ship
 
 class Map:
     owner = None
@@ -11,6 +11,7 @@ class Map:
     coordinates = None
     coordinates_dict = None
     ship_positions = []
+    ship_placed = []
     removed = []
 
     @staticmethod
@@ -74,51 +75,89 @@ class Map:
         print('\n', '  ', ' '.join(self.columns).upper())
         print('', ' '.join(map_display))
 
-    def place_ship(self, ship, **kwargs):
-        placement = None
-        print(ship.size)
+    def place_ship(self, **kwargs):
+
         for key, value in kwargs.items():
+
             if key == 'placement':
                 placement = value
+                selected_ship = self.ship_placed[-1]
 
-        if placement is not None:
-            pass
+            elif key == 'ship':
+                ship_placed_string = [n.name for n in self.ship_placed]
+                if value.name in ship_placed_string:
+                    selected_ship = self.ship_placed[ship_placed_string.index(value.name)]
 
+                    # CREATE A METHOD THAT REMOVES SELECTED SHIP COORDINATES FROM MAP
+
+                    print("Enter coordinate to reposition your {}".format(selected_ship.name))
+
+                else:
+                    selected_ship = value
+                    selected_ship.placed = True
+                    self.ship_placed.append(selected_ship)
+
+                placement = input("\nWhere do you want to put your {}?"
+                                  " (Type Column/Row i.e C3) ".format(selected_ship.name)).lower()
+
+            placement_formatted = (placement[0], int(placement[1]))
+            Map.placement_orientation(self, placement_formatted, selected_ship.size, selected_ship.name)
+
+            Map.clear()
+            Map.map_display(self)
+            logging.info("Position {} is marked by {}"
+                         " for ship placement.".format(self.ship_positions[-1], self.owner))
+            response = input('Are you sure {}? Press any key to continue'
+                             ' or enter another coordinate'
+                             ' to replace your {}. '.format(self.owner, selected_ship.name)).lower()
+
+            try:
+                response_formatted = (response[0], int(response[1]))
+                if response_formatted in self.coordinates:
+                    Map.remove_last(self, selected_ship.size)
+                    self.place_ship(placement=response)
+                else:
+                    self.clear()
+                    self.map_display()
+                    print("Moving on!\n")
+            except IndexError:
+                self.clear()
+                self.map_display()
+                print("Moving on!\n")
+
+    def placement_orientation(self, placement, ship_size, ship_name):
+
+        orientation = input("Do you want to place your {} [V]ertically or [H]orizontally? ".format(ship_name)).lower()
+        points = range(1,ship_size+1)
+
+        if ship_size % 2 == 0:
+            back = int(ship_size/2)
+            front = int(ship_size/2 - 1)
+            coords = range(-back,front+1)
         else:
-            placement = input("\nWhere do you want to put your ship? (Type Column/Row i.e C3) ").lower()
+            front_back = int(ship_size/2)
+            coords = range(-front_back,front_back+1)
 
-        placement_formatted = (placement[0], int(placement[1]))
-        Map.placement_orientation(self, placement_formatted)
-
-        Map.clear()
-        Map.map_display(self)
-        logging.info("Position {} is marked by {} for ship placement.".format(self.ship_positions[-1], self.owner))
-        response = input('Are you sure {}? Press [Y]es to continue'
-                         ' or enter another value correct what you just did. '.format(self.owner))
-
-        if response.lower() == 'y':
-            pass
-        else:
-            Map.remove_last(self)
-            self.place_ship(placement=response)
-
-    def placement_orientation(self, placement):
-        orientation = input("Do you want to place your ship [V]ertically or [H]orizontally? ").lower()
         if orientation == 'h':
-            X1 = (self.columns[self.columns.index(placement[0])+1], placement[1])
-            X2 = (self.columns[self.columns.index(placement[0])], placement[1])
-            X3 = (self.columns[self.columns.index(placement[0])-1], placement[1])
-            Map.placement_check(self, X1)
-            Map.placement_check(self, X2)
-            Map.placement_check(self, X3)
-            self.coordinates_dict[X1] = 'SHIP_H'
-            self.coordinates_dict[X2] = 'SHIP_H'
-            self.coordinates_dict[X3] = 'SHIP_H'
-            self.ship_positions.append(X1)
-            self.ship_positions.append(X2)
-            self.ship_positions.append(X3)
+            x_list = []
+
+            for item in coords:
+                x_list.append((self.columns[self.columns.index(placement[0])+item], placement[1]))
+
+            for item in x_list:
+
+                # ADD DIFFERENT DICTIONARY VALUE FOR EVERY DIFFERENT TYPE OF SHIP
+
+                Map.placement_check(self, item)
+                self.coordinates_dict[item] = 'SHIP_H'
+                self.ship_positions.append(item)
+
 
         elif orientation == 'v':
+
+            # MIRROR WHAY YOU'VE DONE FOR HORIZONTAL
+
+            ship_pos=['Y'+str(n) for n in points]
             Y1 = (placement[0],placement[1]+1)
             Y2 = (placement[0],placement[1])
             Y3 = (placement[0],placement[1]-1)
@@ -136,8 +175,10 @@ class Map:
 
     def placement_check(self, placed_point):
 
+        # CHECK FOR EVERY POINT OF SHIP NOT ONLY CENTER
+
         if placed_point not in self.coordinates:
-            print("Sorry you're trying to place the ship out of"
+            print("Sorry, you're trying to place the ship outside"
                   " the bounds of the map.")
             Map.place_ship(self)
             #insert logger
@@ -148,11 +189,10 @@ class Map:
         else:
             pass
 
-    def remove_last(self):
-        n = 3
-        while n > 0:
+    def remove_last(self, ship_size):
+        while ship_size > 0:
             last_p = self.ship_positions.pop()
             self.coordinates_dict[last_p] = 'EMPTY'
             self.removed.append(last_p)
             logging.info("Ship placement {} removed by {}".format(last_p, self.owner))
-            n -= 1
+            ship_size -= 1
