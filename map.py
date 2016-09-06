@@ -107,7 +107,10 @@ class Map:
 
         for key, value in kwargs.items():
 
-            if key == 'placement':
+            if key == 'ship' and value == 'escape':
+                return 'escape'
+
+            elif key == 'placement':
                 placement = value
                 selected_ship = self.ship_placed[-1]
 
@@ -119,48 +122,78 @@ class Map:
 
                     self.remove_ship(selected_ship)
 
-                    print("Enter coordinate to reposition your {}".format(selected_ship.name))
+                    print("\nEnter coordinate to reposition your {}".format(selected_ship.name))
 
                 else:
                     selected_ship = value
                     selected_ship.placed = True
                     self.ship_placed.append(selected_ship)
 
-                placement = input("\nWhere do you want to put your {}?"
+                placement = input("Where do you want to put your {}?"
                                   " (Type Column/Row i.e C3) ".format(selected_ship.name)).lower()
-        if len(placement) == 2 and placement[0] in list(string.ascii_lowercase)[:self.size] and int(placement[1]) < self.size:
-            placement_formatted = (placement[0], int(placement[1]))
-        elif len(placement) == 3:
-            placement_formatted = (placement[0], int(placement[1]+placement[2]))
-        else:
-            print("Please check your formatting")
-            self.place_ship(ship=selected_ship)
 
-        if Map.placement_orientation(self, placement_formatted, selected_ship) == 'escape':
-            return self.place_ship(ship=selected_ship)
+        if len(placement) == 2 and placement[0] in list(string.ascii_lowercase)[:self.size]\
+           and int(placement[1]) < self.size:
+
+            placement_formatted = (placement[0], int(placement[1]))
+
+            # REPEATED CODE NEST IN A SEPARATE FUNCTION
+            if placement_formatted not in self.coordinates_dict:
+                Map.clear()
+                Map.map_display(self)
+                print("Out of bounds, try again.")
+                self.place_ship(ship=selected_ship)
+
+            orientation_result = Map.placement_orientation(self, placement_formatted, selected_ship)
+
+            if orientation_result == 'escape':
+                return self.place_ship(ship=selected_ship)
+            elif orientation_result == 'soft_escape':
+                self.clear()
+                self.map_display()
+                print("{}, please use 'H' or 'V' to specify\n"
+                      "the orientation of your {}.\n".format(self.owner, selected_ship.name))
+                return self.place_ship(placement=placement_formatted)
+
+            else:
+                Map.clear()
+                Map.map_display(self)
+                logging.info("Position {} is marked by {}"
+                             " for ship placement.".format(self.ship_positions, self.owner))  # CHANGE LOGGING OF POS
+
+        elif len(placement) == 3 and placement[0] in list(string.ascii_lowercase)[:self.size]:
+
+            placement_formatted = (placement[0], int(placement[1]+placement[2]))
+
+            # REPEATED CODE BELOW NEST IN A SEPARATE FUNCTION
+            if placement_formatted not in self.coordinates_dict:
+                Map.clear()
+                Map.map_display(self)
+                print("Out of bounds, try again.")
+                self.place_ship(ship=selected_ship)
+
+            orientation_result = Map.placement_orientation(self, placement_formatted, selected_ship)
+
+            if orientation_result == 'escape':
+                return self.place_ship(ship=selected_ship)
+            elif orientation_result == 'soft_escape':
+                self.clear()
+                self.map_display()
+                print("{}, please use 'H' or 'V' to specify\n"
+                      "the orientation of your {}.\n".format(self.owner, selected_ship.name))
+                return self.place_ship(placement=placement_formatted)
+
+            else:
+                Map.clear()
+                Map.map_display(self)
+                logging.info("Position {} is marked by {}"
+                             " for ship placement.".format(self.ship_positions, self.owner))  # CHANGE LOGGING OF POS
 
         else:
             Map.clear()
             Map.map_display(self)
-            logging.info("Position {} is marked by {}"
-                         " for ship placement.".format(self.ship_positions, self.owner))  # CHANGE LOGGING OF SHIP POS
-            response = input('Are you sure {}? Press any key to continue\n'
-                             'or enter another coordinate'
-                             ' to replace your {}. '.format(self.owner, selected_ship.name)).lower()
-
-            try:
-                response_formatted = (response[0], int(response[1]))
-                if response_formatted in self.coordinates:
-                    self.remove_ship(selected_ship)
-                    self.place_ship(placement=response)
-                else:
-                    self.clear()
-                    self.map_display()
-                    print("Success!\n")
-            except IndexError:
-                self.clear()
-                self.map_display()
-                print("Success!\n")
+            print("Please check your formatting")
+            self.place_ship(ship=selected_ship)
 
     def placement_orientation(self, placement, selected_ship):
 
@@ -168,7 +201,6 @@ class Map:
         ship_name = selected_ship.name
 
         orientation = input("Do you want to place your {} [V]ertically or [H]orizontally? ".format(ship_name)).lower()
-        points = range(1,ship_size+1)
 
         if ship_size % 2 == 0:
             back = int(ship_size/2)
@@ -234,6 +266,8 @@ class Map:
                     return 'escape'
                 self.coordinates_dict[coordinate] = 'SHIP_V_'+selected_ship.name
                 self.ship_positions.append(coordinate)
+        else:
+            return 'soft_escape'
 
     def placement_check(self, coordinate):
         if coordinate not in self.coordinates:
