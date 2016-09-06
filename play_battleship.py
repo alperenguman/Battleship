@@ -35,9 +35,9 @@ def choose_ship(which_map):
                          " Press any key to move on or select a ship to edit its position.")
     response = input("[A]ircraft Carrier (Size: 5)" + "."*3*a_placed+"PLACED"*a_placed+"\n"
                      "[B]attleship, (Size:4)"+"."*9*b_placed+"PLACED"*b_placed+"\n"
-                     "[C]ruiser (Size: 3)"+"."*14*c_placed+"PLACED"*c_placed+"\n"
+                     "[C]ruiser (Size: 3)"+"."*12*c_placed+"PLACED"*c_placed+"\n"
                      "[S]ubmarine (Size: 3)"+"."*10*s_placed+"PLACED"*s_placed+"\n"
-                     "[P]atrol Boat (Size: 2)"+"."*7*p_placed+"PLACED"*p_placed+"\n\n"
+                     "[P]atrol Boat (Size: 2)"+"."*8*p_placed+"PLACED"*p_placed+"\n\n"
                      "Please select a ship to place: ")
     if response.lower() == 'a':
         return ship.AircraftCarrier()
@@ -52,8 +52,10 @@ def choose_ship(which_map):
     elif a_placed and b_placed and c_placed and s_placed and p_placed:
         pass
     else:
-        # Clear map, throw detailed error after something other than a ship name is given
-        choose_ship(which_map)
+        clear()
+        which_map.map_display()
+        print("'{}' does not denote a ship.\n Please select a ship using its first letter.\n".format(response))
+        return choose_ship(which_map)
 
 if __name__ == "__main__":
     clear()

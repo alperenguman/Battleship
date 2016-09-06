@@ -68,6 +68,17 @@ class Map:
                 map_display.append('\n')
             elif self.coordinates_dict[item] == "EMPTY":
                 map_display.append('O')
+            elif self.coordinates_dict[item][5] == "H" and n % len(self.columns) == 0 and m < len(self.rows):
+                map_display.append('-')
+                map_display.append('\n')
+                if self.rows[m] < 10:
+                    map_display.append(' '+str(self.rows[m]))
+                else:
+                    map_display.append(str(self.rows[m]))
+                m += 1
+            elif self.coordinates_dict[item][5] == "H" and n % len(self.columns) == 0:
+                map_display.append('-')
+                map_display.append('\n')
             elif self.coordinates_dict[item][5] == "H":
                 map_display.append('-')
             elif self.coordinates_dict[item][5] == "V" and n % len(self.columns) == 0 and m < len(self.rows):
@@ -125,29 +136,31 @@ class Map:
             print("Please check your formatting")
             self.place_ship(ship=selected_ship)
 
-        Map.placement_orientation(self, placement_formatted, selected_ship)
+        if Map.placement_orientation(self, placement_formatted, selected_ship) == 'escape':
+            return self.place_ship(ship=selected_ship)
 
-        Map.clear()
-        Map.map_display(self)
-        logging.info("Position {} is marked by {}"
-                     " for ship placement.".format(self.ship_positions, self.owner))  # CHANGE LOGGING OF SHIP POS
-        response = input('Are you sure {}? Press any key to continue'
-                         ' or enter another coordinate'
-                         ' to replace your {}. '.format(self.owner, selected_ship.name)).lower()
+        else:
+            Map.clear()
+            Map.map_display(self)
+            logging.info("Position {} is marked by {}"
+                         " for ship placement.".format(self.ship_positions, self.owner))  # CHANGE LOGGING OF SHIP POS
+            response = input('Are you sure {}? Press any key to continue\n'
+                             'or enter another coordinate'
+                             ' to replace your {}. '.format(self.owner, selected_ship.name)).lower()
 
-        try:
-            response_formatted = (response[0], int(response[1]))
-            if response_formatted in self.coordinates:
-                self.remove_ship(selected_ship)
-                self.place_ship(placement=response)
-            else:
+            try:
+                response_formatted = (response[0], int(response[1]))
+                if response_formatted in self.coordinates:
+                    self.remove_ship(selected_ship)
+                    self.place_ship(placement=response)
+                else:
+                    self.clear()
+                    self.map_display()
+                    print("Success!\n")
+            except IndexError:
                 self.clear()
                 self.map_display()
                 print("Success!\n")
-        except IndexError:
-            self.clear()
-            self.map_display()
-            print("Success!\n")
 
     def placement_orientation(self, placement, selected_ship):
 
@@ -178,13 +191,18 @@ class Map:
                 for item in coords:
                     x_list.append((self.columns[self.columns.index(placement[0])+item], placement[1]))
             else:
+                self.clear()
+                self.map_display()
                 print("Your placement is out of bounds. ")
-                Map.place_ship(self, ship=selected_ship)
+                return 'escape'
 
             for coordinate in x_list:
-
-                Map.placement_check(self, coordinate, selected_ship)
-
+                if self.placement_check(coordinate):
+                    self.remove_ship(selected_ship)
+                    self.clear()
+                    self.map_display()
+                    print("Your placement intersects another ship. ")
+                    return 'escape'
                 self.coordinates_dict[coordinate] = 'SHIP_H_'+selected_ship.name
                 self.ship_positions.append(coordinate)
 
@@ -202,37 +220,34 @@ class Map:
                 for item in coords:
                     y_list.append((placement[0], self.rows[self.rows.index(placement[1])+item]))
             else:
+                self.clear()
+                self.map_display()
                 print("Your placement is out of bounds. ")
-                Map.place_ship(self, ship=selected_ship)
+                return 'escape'
 
             for coordinate in y_list:
-
-                Map.placement_check(self, coordinate, selected_ship)
+                if self.placement_check(coordinate):
+                    self.remove_ship(selected_ship)
+                    self.clear()
+                    self.map_display()
+                    print("Your placement intersects another ship. ")
+                    return 'escape'
                 self.coordinates_dict[coordinate] = 'SHIP_V_'+selected_ship.name
                 self.ship_positions.append(coordinate)
 
-        else:
-            Map.placement_orientation(self)
-
-    def placement_check(self, coordinate, selected_ship):
-
+    def placement_check(self, coordinate):
         if coordinate not in self.coordinates:
-            print("Sorry, you're trying to place the ship outside"
-                  " the bounds of the map.")
-            Map.place_ship(self, ship=selected_ship)
-            #insert logger
+            return False
+
         elif self.coordinates_dict[coordinate] != 'EMPTY':
-            print("Sorry your placement intersects another ship.")
-            Map.place_ship(self, ship=selected_ship)
-            #insert logger
+            return True
 
         else:
-            pass
+            return False
 
-
-    def remove_ship(self, ship):
+    def remove_ship(self, selected_ship):
 
         for key, value in self.coordinates_dict.items():
-            if value == 'SHIP_H_'+ship.name:
+            if value == 'SHIP_H_'+selected_ship.name or value == 'SHIP_V_'+selected_ship.name:
                 self.coordinates_dict[key] = 'EMPTY'
 
