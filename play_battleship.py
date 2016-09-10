@@ -33,14 +33,14 @@ def choose_ship(which_map):
     if a_placed and b_placed and c_placed and s_placed and p_placed:
         clear()
         which_map.map_display()
-        response = input("Great! you placed all your ships {}.\n\n"
-                         "[A]ircraft Carrier (Size: 5)" + "."*3*a_placed+"PLACED"*a_placed+"\n"
+        print("Great! you placed all your ships {}\n".format(which_map.owner))
+        response = input("[A]ircraft Carrier (Size: 5)" + "."*3*a_placed+"PLACED"*a_placed+"\n"
                          "[B]attleship, (Size:4)"+"."*9*b_placed+"PLACED"*b_placed+"\n"
                          "[C]ruiser (Size: 3)"+"."*12*c_placed+"PLACED"*c_placed+"\n"
                          "[S]ubmarine (Size: 3)"+"."*10*s_placed+"PLACED"*s_placed+"\n"
                          "[P]atrol Boat (Size: 2)"+"."*8*p_placed+"PLACED"*p_placed+"\n\n"
                          "Press any key to move on\n"
-                         "or select a ship to edit its position: ".format(which_map.owner))
+                         "or select a ship to edit its position: ")
         if response.lower() == 'a':
             return ship.AircraftCarrier()
         elif response.lower() == 'b':
@@ -76,25 +76,45 @@ def choose_ship(which_map):
         print("'{}' does not denote a ship.\n Please select a ship using its first letter.\n".format(response))
         return choose_ship(which_map)
 
+
+def game_setup():
+
+        player1 = Player()
+        clear()
+        player1_map = Map(owner=player1.name)
+        player1_guess_map = Map(owner=player1.name)
+        player1_map.map_display()
+
+        while True:
+            if player1_map.place_ship(ship=choose_ship(player1_map)) == 'escape':
+                break
+
+        clear()
+        input("{} please pass the game to {} and press any key"
+              " when you're ready to continue".format(player1.name, 'Player 2'))
+        clear()
+        player2 = Player()
+        clear()
+        player2_map = Map(owner=player2.name)
+        player2_guess_map = Map(owner=player2.name)
+        player2_map.map_display()
+
+        while True:
+            if player2_map.place_ship(ship=choose_ship(player2_map)) == 'escape':
+                break
+        clear()
+        return player1_map, player1_guess_map, player2_map, player2_guess_map
+
 if __name__ == "__main__":
     clear()
     logo_path = os.path.dirname(__file__) + "/logo"
     with open(logo_path) as logo:
         logo_string = [letters for letters in logo]
         input(''.join(logo_string))
+    player1_map, player1_guess_map, player2_map, player2_guess_map = game_setup()
+    player2_guess_map.map_display()
+    print("{} above is your guess map.\n"
+          "Please select where you want to attack.")
+    player2_map.map_display()
+    input("\nEnter coordinate to attack:")
 
-    player1 = Player()
-    clear()
-    player1_map = Map(owner=player1.name)
-    player1_map.map_display()
-
-    while True:
-        if player1_map.place_ship(ship=choose_ship(player1_map)) == 'escape':
-            break
-
-    clear()
-    input("{} please pass the game to {} and press any key"
-          " when you're ready to continue".format(player1.name, 'Player 2'))
-
-    clear()
-    player2 = player.Player()
