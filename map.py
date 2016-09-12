@@ -488,32 +488,27 @@ class Map:
             elif self.coordinates_dict[item] == "ATTACKED_P" and p_n < ship.PatrolBoat.size:
                     p_n += 1
 
-        if check_ship.lower == 'a':
-            pdb.set_trace()
+        if check_ship.lower() == 'a':
             if a_n == ship.AircraftCarrier.size:
                 return 1
             else:
                 return 0
-        elif check_ship.lower == 'b':
-            pdb.set_trace()
+        elif check_ship.lower() == 'b':
             if b_n == ship.Battleship.size:
                 return 1
             else:
                 return 0
-        elif check_ship.lower == 'c':
-            pdb.set_trace()
+        elif check_ship.lower() == 'c':
             if c_n == ship.Cruiser.size:
                 return 1
             else:
                 return 0
-        elif check_ship.lower == 's':
-            pdb.set_trace()
+        elif check_ship.lower() == 's':
             if s_n == ship.Submarine.size:
                 return 1
             else:
                 return 0
-        elif check_ship.lower == 'p':
-            pdb.set_trace()
+        elif check_ship.lower() == 'p':
             if p_n == ship.PatrolBoat.size:
                 return 1
             else:

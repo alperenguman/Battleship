@@ -4,7 +4,6 @@ import ship
 import sys
 import os
 import logging
-import pdb
 
 
 def clear():
@@ -111,9 +110,10 @@ def game_loop():
         elif turn > 1 and last_event[0] == "missed":
             print("{} missed!".format(player1.name))
         elif turn > 1 and last_event[0] == "hit":
-            print("{} hit your {} on {}!".format(player1.name, last_event[2], last_event[1]))
-        else:
-            print("Status Error")
+            if player2_map.sink_check(last_event[2][0]):
+                print("{} sunk your {}!!!".format(player1.name, last_event[2]))
+            else:
+                print("{} hit your {} on {}!".format(player1.name, last_event[2], last_event[1]))
         player2_map.map_display()
 
         player2_attack = input("\nEnter coordinate to attack:")
@@ -146,7 +146,10 @@ def game_loop():
         elif turn > 1 and last_event[0] == "missed":
             print("{} missed!".format(player1.name))
         elif turn > 1 and last_event[0] == "hit":
-            print("{} hit your {} on {}!".format(player1.name, last_event[2], last_event[1]))
+            if player1_map.sink_check(last_event[2][0]):
+                print("{} sunk your {}!!!".format(player2.name, last_event[2]))
+            else:
+                print("{} hit your {} on {}!".format(player2.name, last_event[2], last_event[1]))
         else:
             print("Status Error")
         player1_map.map_display()
