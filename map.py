@@ -422,9 +422,7 @@ class Map:
         elif len(coordinate_unformatted) == 3 and coordinate_unformatted[0] in list(string.ascii_lowercase)[:self.size]:
             coordinate = (coordinate_unformatted[0], int(coordinate_unformatted[1]+coordinate_unformatted[2]))
         else:
-            print("That's not a valid coordinate.")
-            response = input("Please enter a coordinate: ")
-            self.attack(response)
+            return "failed"
 
         last_event = []
         if coordinate in self.coordinates:

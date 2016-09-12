@@ -98,6 +98,7 @@ def game_loop():
 
     turn = 0
     ship_sizes_sum, player1_taken_hits_sum, player2_taken_hits_sum = 1, 0, 0
+    last_event = "all good"
 
     while player1_taken_hits_sum < ship_sizes_sum and player2_taken_hits_sum < ship_sizes_sum:
         clear()
@@ -114,10 +115,21 @@ def game_loop():
                 print("{} sunk your {}!!!".format(player1.name, last_event[2]))
             else:
                 print("{} hit your {} on {}!".format(player1.name, last_event[2], last_event[1]))
+        else:
+            print("Status Error")
+
         player2_map.map_display()
 
         player2_attack = input("\nEnter coordinate to attack:")
         last_event = player1_map.attack(player2_attack)
+        while last_event == "failed":
+            clear()
+            player2_map.guess_map_display()
+            print("You made an incorrect input\n"
+                  "for coordinate to attack")
+            player2_map.map_display()
+            player2_attack = input("\nEnter coordinate to attack:")
+            last_event = player1_map.attack(player2_attack)
 
         clear()
         player1_map.guess_map_display()
@@ -152,10 +164,19 @@ def game_loop():
                 print("{} hit your {} on {}!".format(player2.name, last_event[2], last_event[1]))
         else:
             print("Status Error")
+
         player1_map.map_display()
 
         player1_attack = input("\nEnter coordinate to attack:")
         last_event = player2_map.attack(player1_attack)
+        while last_event == "failed":
+            clear()
+            player2_map.guess_map_display()
+            print("You made an incorrect input\n"
+                  "for coordinate to attack")
+            player1_map.map_display()
+            player1_attack = input("\nEnter coordinate to attack:")
+            last_event = player2_map.attack(player1_attack)
 
         clear()
         player2_map.guess_map_display()
@@ -203,9 +224,3 @@ if __name__ == "__main__":
     player1, player2, player1_map, player2_map = game_setup()
 
     game_loop()
-
-
-
-
-
-
