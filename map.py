@@ -3,7 +3,7 @@ import sys
 import os
 import string
 import ship
-
+import pdb
 
 class Map:
     owner = None
@@ -52,23 +52,7 @@ class Map:
         map_display.append(' '+str(self.rows[m]))
         m = 1
 
-        a_n = 0
-        b_n = 0
-        c_n = 0
-        s_n = 0
-        p_n = 0
-
-        for item in self.coordinates:
-            if self.coordinates_dict[item] == "ATTACKED_A" and a_n < ship.AircraftCarrier.size:
-                    a_n += 1
-            elif self.coordinates_dict[item] == "ATTACKED_B" and b_n < ship.Battleship.size:
-                    b_n += 1
-            elif self.coordinates_dict[item] == "ATTACKED_C" and c_n < ship.Cruiser.size:
-                c_n += 1
-            elif self.coordinates_dict[item] == "ATTACKED_S" and s_n < ship.Submarine.size:
-                    s_n += 1
-            elif self.coordinates_dict[item] == "ATTACKED_P" and p_n < ship.PatrolBoat.size:
-                    p_n += 1
+        a_n, b_n, c_n, s_n, p_n = self.sink_check('all')
 
         for item in self.coordinates:
             n += 1
@@ -239,7 +223,6 @@ class Map:
 
         print('\n', '  ', ' '.join(self.columns).upper())
         print('', ' '.join(map_display))
-        return a_n, b_n, c_n, s_n, p_n
 
     def guess_map_display(self):
         self.type = 'guess_map'
@@ -442,7 +425,6 @@ class Map:
             print("That's not a valid coordinate.")
             response = input("Please enter a coordinate: ")
             self.attack(response)
-            return 'fail'
 
         last_event = []
         if coordinate in self.coordinates:
@@ -472,8 +454,69 @@ class Map:
                 elif key == coordinate and value[7] == 'P':
                     self.coordinates_dict[key] = 'ATTACKED' + '_P'
                     last_event = ["hit", coordinate, "Patrol Boat"]
-                return last_event
+
+            return last_event
+
         else:
             print("That's not a valid coordinate.")
             response = input("Please enter a coordinate: ")
             self.attack(response)
+
+    def sink_check(self, *args):
+
+        arg_l = []
+        for arg in args:
+            arg_l.append(arg)
+
+        check_ship = arg_l[0]
+
+        a_n = 0
+        b_n = 0
+        c_n = 0
+        s_n = 0
+        p_n = 0
+
+        for item in self.coordinates:
+            if self.coordinates_dict[item] == "ATTACKED_A" and a_n < ship.AircraftCarrier.size:
+                    a_n += 1
+            elif self.coordinates_dict[item] == "ATTACKED_B" and b_n < ship.Battleship.size:
+                    b_n += 1
+            elif self.coordinates_dict[item] == "ATTACKED_C" and c_n < ship.Cruiser.size:
+                    c_n += 1
+            elif self.coordinates_dict[item] == "ATTACKED_S" and s_n < ship.Submarine.size:
+                    s_n += 1
+            elif self.coordinates_dict[item] == "ATTACKED_P" and p_n < ship.PatrolBoat.size:
+                    p_n += 1
+
+        if check_ship.lower == 'a':
+            pdb.set_trace()
+            if a_n == ship.AircraftCarrier.size:
+                return 1
+            else:
+                return 0
+        elif check_ship.lower == 'b':
+            pdb.set_trace()
+            if b_n == ship.Battleship.size:
+                return 1
+            else:
+                return 0
+        elif check_ship.lower == 'c':
+            pdb.set_trace()
+            if c_n == ship.Cruiser.size:
+                return 1
+            else:
+                return 0
+        elif check_ship.lower == 's':
+            pdb.set_trace()
+            if s_n == ship.Submarine.size:
+                return 1
+            else:
+                return 0
+        elif check_ship.lower == 'p':
+            pdb.set_trace()
+            if p_n == ship.PatrolBoat.size:
+                return 1
+            else:
+                return 0
+        else:
+            return a_n, b_n, c_n, s_n, p_n
