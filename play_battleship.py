@@ -1,12 +1,10 @@
 from map import Map
 from player import Player
-import player
 import ship
 import sys
 import os
 import logging
-
-logging.basicConfig(filename='battleship.log', level=logging.DEBUG)
+import pdb
 
 
 def clear():
@@ -14,13 +12,6 @@ def clear():
         os.system("cls")
     else:
         os.system("clear")
-
-
-def pass_laptop():
-    clear()
-    input("{} please pass the game to {} and press any key"
-          " when you're ready to continue".format(player1.name, player2.name))
-    clear()
 
 
 def choose_ship(which_map):
@@ -82,7 +73,6 @@ def game_setup():
         player1 = Player()
         clear()
         player1_map = Map(owner=player1.name)
-        player1_guess_map = Map(owner=player1.name)
         player1_map.map_display()
 
         while True:
@@ -96,25 +86,113 @@ def game_setup():
         player2 = Player()
         clear()
         player2_map = Map(owner=player2.name)
-        player2_guess_map = Map(owner=player2.name)
         player2_map.map_display()
 
         while True:
             if player2_map.place_ship(ship=choose_ship(player2_map)) == 'escape':
                 break
         clear()
-        return player1_map, player1_guess_map, player2_map, player2_guess_map
+        return player1, player2, player1_map, player2_map
+
+
+def hit_or_miss(event):
+    if event[0] == 'Missed':
+        return 0
+    else:
+        return 1
+
+
+def game_loop(self_prompt, other_prompt):
+
+    player1_map.guess_map_display()
+    print("{} above is your enemy's map.\n"
+          "Please select where you want to attack.".format(player2_map.owner))
+    player2_map.map_display()
+    player2_attack = input("\nEnter coordinate to attack:")
+    last_event = player1_map.attack(player2_attack)
+    hit_miss_binary = hit_or_miss(last_event)
+    clear()
+    player1_map.guess_map_display()
+    print("You" + last_event[0] + "an enemy ship!"*hit_miss_binary)
+    a_n2, b_n2, c_n2, s_n2, p_n2 = player2_map.map_display()
+    input("Please press any key to continue.")
+
+    clear()
+    input("Please pass the laptop to {} and press any key to continue.".format(player1_map.owner))
+
+    clear()
+    player2_map.guess_map_display()
+    print("{} above is your guess map.\n"
+          "Please select where you want to attack.".format(player1_map.owner))
+    player1_map.map_display()
+    player1_attack = input("\nEnter coordinate to attack:")
+    last_event = player2_map.attack(player1_attack)
+
+    clear()
+    player2_map.guess_map_display()
+    print("You" + last_event[0])
+    a_n, b_n, c_n, s_n, p_n = player1_map.map_display()
+    input("Please press any key to continue.")
+
+    clear()
+    input("Please pass the laptop to {} and press any key to continue.".format(player2_map.owner))
+
+    ship_sizes_sum = ship.AircraftCarrier.size + ship.Battleship.size + ship.Cruiser.size + \
+        ship.Ship.size + ship.PatrolBoat.size
+    player1_taken_hits_sum = a_n + b_n + c_n + s_n + p_n
+    player2_taken_hits_sum = a_n2 + b_n2 + c_n2 + s_n2 + p_n2
+
+    return ship_sizes_sum, player1_taken_hits_sum, player2_taken_hits_sum
 
 if __name__ == "__main__":
+
+    logging.basicConfig(filename='battleship.log', level=logging.DEBUG)
     clear()
+
     logo_path = os.path.dirname(__file__) + "/logo"
     with open(logo_path) as logo:
         logo_string = [letters for letters in logo]
         input(''.join(logo_string))
-    player1_map, player1_guess_map, player2_map, player2_guess_map = game_setup()
-    player2_guess_map.map_display()
-    print("{} above is your guess map.\n"
-          "Please select where you want to attack.")
-    player2_map.map_display()
-    input("\nEnter coordinate to attack:")
 
+    player1, player2, player1_map, player2_map = game_setup()
+
+    ship_sizes_sum, player1_taken_hits_sum, player2_taken_hits_sum = game_loop()
+
+    while player1_taken_hits_sum < ship_sizes_sum or  player2_taken_hits_sum < ship_sizes_sum:
+
+        clear()
+        player1_map.guess_map_display()
+        print("{}, {}.\n"
+              "Please select where you want to attack.".format(player2_map.owner, last_event))
+        player2_map.map_display()
+
+        player2_attack = input("\nEnter coordinate to attack:")
+        player1_map.attack(player2_attack)
+        clear()
+        player1_map.guess_map_display()
+        player2_map.map_display()
+        input("Please press any key to continue.")
+        clear()
+        input("Please pass the laptop to {} and press any key to continue.".format(player1_map.owner))
+        clear()
+        player2_map.guess_map_display()
+        print("{} above is your guess map.\n"
+              "Please select where you want to attack.".format(player1_map.owner))
+        player1_map.map_display()
+        player1_attack = input("\nEnter coordinate to attack:")
+        player2_map.attack(player1_attack)
+        clear()
+        player2_map.guess_map_display()
+        a_n, b_n, c_n, s_n, p_n = player1_map.map_display()
+        input("Please press any key to continue.")
+        clear()
+        input("Please pass the laptop to {} and press any key to continue.".format(player2_map.owner))
+        clear()
+    if player1_taken_hits_sum == ship_sizes_sum:
+        player2_map.map_display()
+        print("{} WINS!".format(player2.name))
+        player1_map.map_display()
+    elif player2_taken_hits_sum == ship_sizes_sum:
+        player1_map.map_display()
+        print("{} WINS!".format(player1.name))
+        player2_map.map_display()

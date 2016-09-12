@@ -3,7 +3,6 @@ import sys
 import os
 import string
 import ship
-import pdb
 
 
 class Map:
@@ -13,9 +12,7 @@ class Map:
     columns = None
     coordinates = None
     coordinates_dict = None
-    ship_positions = []
-    ship_placed = []
-    removed = []
+    type = 'primary'
 
     @staticmethod
     def clear():
@@ -25,6 +22,9 @@ class Map:
             os.system("clear")
 
     def __init__(self, **kwargs):
+        self.ship_positions = []
+        self.ship_placed = []
+        self.removed = []
 
         for key, value in kwargs.items():
             setattr(self, key, value)
@@ -46,12 +46,29 @@ class Map:
             self.coordinates_dict[items] = "EMPTY"
 
     def map_display(self):
-
         map_display = []
         n = 0
         m = 0
         map_display.append(' '+str(self.rows[m]))
         m = 1
+
+        a_n = 0
+        b_n = 0
+        c_n = 0
+        s_n = 0
+        p_n = 0
+
+        for item in self.coordinates:
+            if self.coordinates_dict[item] == "ATTACKED_A" and a_n < ship.AircraftCarrier.size:
+                    a_n += 1
+            elif self.coordinates_dict[item] == "ATTACKED_B" and b_n < ship.Battleship.size:
+                    b_n += 1
+            elif self.coordinates_dict[item] == "ATTACKED_C" and c_n < ship.Cruiser.size:
+                c_n += 1
+            elif self.coordinates_dict[item] == "ATTACKED_S" and s_n < ship.Submarine.size:
+                    s_n += 1
+            elif self.coordinates_dict[item] == "ATTACKED_P" and p_n < ship.PatrolBoat.size:
+                    p_n += 1
 
         for item in self.coordinates:
             n += 1
@@ -69,7 +86,10 @@ class Map:
             elif self.coordinates_dict[item] == "EMPTY":
                 map_display.append('O')
             elif self.coordinates_dict[item][5] == "H" and n % len(self.columns) == 0 and m < len(self.rows):
-                map_display.append('-')
+                if self.type == 'guess_map':
+                    map_display.append('O')
+                else:
+                    map_display.append('-')
                 map_display.append('\n')
                 if self.rows[m] < 10:
                     map_display.append(' '+str(self.rows[m]))
@@ -77,12 +97,21 @@ class Map:
                     map_display.append(str(self.rows[m]))
                 m += 1
             elif self.coordinates_dict[item][5] == "H" and n % len(self.columns) == 0:
-                map_display.append('-')
+                if self.type == 'guess_map':
+                    map_display.append('O')
+                else:
+                    map_display.append('-')
                 map_display.append('\n')
             elif self.coordinates_dict[item][5] == "H":
-                map_display.append('-')
+                if self.type == 'guess_map':
+                    map_display.append('O')
+                else:
+                    map_display.append('-')
             elif self.coordinates_dict[item][5] == "V" and n % len(self.columns) == 0 and m < len(self.rows):
-                map_display.append('|')
+                if self.type == 'guess_map':
+                    map_display.append('O')
+                else:
+                    map_display.append('|')
                 map_display.append('\n')
                 if self.rows[m] < 10:
                     map_display.append(' '+str(self.rows[m]))
@@ -90,15 +119,132 @@ class Map:
                     map_display.append(str(self.rows[m]))
                 m += 1
             elif self.coordinates_dict[item][5] == "V" and n % len(self.columns) == 0:
-                map_display.append('|')
+                if self.type == 'guess_map':
+                    map_display.append('O')
+                else:
+                    map_display.append('|')
                 map_display.append('\n')
             elif self.coordinates_dict[item][5] == "V":
-                map_display.append('|')
+                if self.type == 'guess_map':
+                    map_display.append('O')
+                else:
+                    map_display.append('|')
+
+            elif len(self.coordinates_dict[item]) == 10 and n % len(self.columns) == 0 and m < len(self.rows):
+
+                if self.coordinates_dict[item] == "ATTACKED_A":
+                    if a_n >= ship.AircraftCarrier.size:
+                        map_display.append('#')
+                    else:
+                        map_display.append('*')
+
+                elif self.coordinates_dict[item] == "ATTACKED_B":
+                    if b_n >= ship.Battleship.size:
+                        map_display.append('#')
+                    else:
+                        map_display.append('*')
+
+                elif self.coordinates_dict[item] == "ATTACKED_C":
+                    if c_n >= ship.Cruiser.size:
+                        map_display.append('#')
+                    else:
+                        map_display.append('*')
+                elif self.coordinates_dict[item] == "ATTACKED_S":
+                    if s_n >= ship.Submarine.size:
+                        map_display.append('#')
+                    else:
+                        map_display.append('*')
+                elif self.coordinates_dict[item] == "ATTACKED_P":
+                    if p_n >= ship.PatrolBoat.size:
+                        map_display.append('#')
+                    else:
+                        map_display.append('*')
+                elif self.coordinates_dict[item] == "ATTACKED_N":
+                    map_display.append('.')
+
+                map_display.append('\n')
+                if self.rows[m] < 10:
+                    map_display.append(' '+str(self.rows[m]))
+                else:
+                    map_display.append(str(self.rows[m]))
+                m += 1
+
+            elif len(self.coordinates_dict[item]) == 10 and n % len(self.columns) == 0:
+
+                if self.coordinates_dict[item] == "ATTACKED_A":
+                    if a_n >= ship.AircraftCarrier.size:
+                        map_display.append('#')
+                    else:
+                        map_display.append('*')
+                elif self.coordinates_dict[item] == "ATTACKED_B":
+                    if b_n >= ship.Battleship.size:
+                        map_display.append('#')
+                    else:
+                        map_display.append('*')
+
+                elif self.coordinates_dict[item] == "ATTACKED_C":
+                    if c_n >= ship.Cruiser.size:
+                        map_display.append('#')
+                    else:
+                        map_display.append('*')
+                elif self.coordinates_dict[item] == "ATTACKED_S":
+                    if s_n >= ship.Submarine.size:
+                        map_display.append('#')
+                    else:
+                        map_display.append('*')
+                elif self.coordinates_dict[item] == "ATTACKED_P":
+                    if p_n >= ship.PatrolBoat.size:
+                        map_display.append('#')
+                    else:
+                        map_display.append('*')
+                elif self.coordinates_dict[item] == "ATTACKED_N":
+                    map_display.append('.')
+
+                map_display.append('\n')
+
+            elif len(self.coordinates_dict[item]) == 10:
+
+                if self.coordinates_dict[item] == "ATTACKED_A":
+                    if a_n >= ship.AircraftCarrier.size:
+                        map_display.append('#')
+                    else:
+                        map_display.append('*')
+
+                elif self.coordinates_dict[item] == "ATTACKED_B":
+                    if b_n >= ship.Battleship.size:
+                        map_display.append('#')
+                    else:
+                        map_display.append('*')
+
+                elif self.coordinates_dict[item] == "ATTACKED_C":
+                    if c_n >= ship.Cruiser.size:
+                        map_display.append('#')
+                    else:
+                        map_display.append('*')
+                elif self.coordinates_dict[item] == "ATTACKED_S":
+                    if s_n >= ship.Submarine.size:
+                        map_display.append('#')
+                    else:
+                        map_display.append('*')
+                elif self.coordinates_dict[item] == "ATTACKED_P":
+                    if p_n >= ship.PatrolBoat.size:
+                        map_display.append('#')
+                    else:
+                        map_display.append('*')
+                elif self.coordinates_dict[item] == "ATTACKED_N":
+                    map_display.append('.')
+
             else:
-                map_display.append('1')
+                print("MAP DISPLAY PROBLEM!")
 
         print('\n', '  ', ' '.join(self.columns).upper())
         print('', ' '.join(map_display))
+        return a_n, b_n, c_n, s_n, p_n
+
+    def guess_map_display(self):
+        self.type = 'guess_map'
+        self.map_display()
+        self.type = 'primary'
 
     def place_ship(self, **kwargs):
 
@@ -205,10 +351,10 @@ class Map:
         if ship_size % 2 == 0:
             back = int(ship_size/2)
             front = int(ship_size/2 - 1)
-            coords = range(-back,front+1)
+            coords = range(-back, front+1)
         else:
             front_back = int(ship_size/2)
-            coords = range(-front_back,front_back+1)
+            coords = range(-front_back, front_back+1)
 
         if orientation == 'h':
             x_list = []
@@ -285,3 +431,49 @@ class Map:
             if value == 'SHIP_H_'+selected_ship.name or value == 'SHIP_V_'+selected_ship.name:
                 self.coordinates_dict[key] = 'EMPTY'
 
+    def attack(self, coordinate_unformatted):
+
+        if len(coordinate_unformatted) == 2 and coordinate_unformatted[0] in list(string.ascii_lowercase)[:self.size]\
+           and int(coordinate_unformatted[1]) < self.size:
+            coordinate = (coordinate_unformatted[0].lower(), int(coordinate_unformatted[1]))
+        elif len(coordinate_unformatted) == 3 and coordinate_unformatted[0] in list(string.ascii_lowercase)[:self.size]:
+            coordinate = (coordinate_unformatted[0], int(coordinate_unformatted[1]+coordinate_unformatted[2]))
+        else:
+            print("That's not a valid coordinate.")
+            response = input("Please enter a coordinate: ")
+            self.attack(response)
+            return 'fail'
+
+        last_event = []
+        if coordinate in self.coordinates:
+            for key, value in self.coordinates_dict.items():
+
+                if key == coordinate and value[0] == 'A':
+                    print("You have previously attacked this coordinate!\n"
+                          "Please retry.")
+                    response = input("Please enter a coordinate: ")
+                    self.attack(response)
+
+                elif key == coordinate and value == 'EMPTY':
+                    self.coordinates_dict[key] = 'ATTACKED' + '_N'
+                    last_event = ["missed", coordinate]
+                elif key == coordinate and value[7] == 'A':
+                    self.coordinates_dict[key] = 'ATTACKED' + '_A'
+                    last_event = ["hit", coordinate, "Aircraft Carrier"]
+                elif key == coordinate and value[7] == 'B':
+                    self.coordinates_dict[key] = 'ATTACKED' + '_B'
+                    last_event = ["hit", coordinate, "Battleship"]
+                elif key == coordinate and value[7] == 'C':
+                    self.coordinates_dict[key] = 'ATTACKED' + '_C'
+                    last_event = ["hit", coordinate, "Cruiser"]
+                elif key == coordinate and value[7] == 'S':
+                    self.coordinates_dict[key] = 'ATTACKED' + '_S'
+                    last_event = ["hit", coordinate, "Submarine"]
+                elif key == coordinate and value[7] == 'P':
+                    self.coordinates_dict[key] = 'ATTACKED' + '_P'
+                    last_event = ["hit", coordinate, "Patrol Boat"]
+                return last_event
+        else:
+            print("That's not a valid coordinate.")
+            response = input("Please enter a coordinate: ")
+            self.attack(response)

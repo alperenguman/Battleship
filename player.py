@@ -3,7 +3,6 @@ import map
 
 class Player:
 
-
     name = "Unknown Player"
 
     def get_name(self):
@@ -23,4 +22,4 @@ class Player:
         self.get_name()
 
     def __str__(self):
-        return("{}: {}".format(__class__.__name__, self.name))
+        return "{}: {}".format(__class__.__name__, self.name)
