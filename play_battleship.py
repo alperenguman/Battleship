@@ -216,12 +216,17 @@ def game_loop():
         logging.info("Game ended and {} won.".format(player1.name))
 
 if __name__ == "__main__":
-    log_dir = os.path.dirname(__file__)+'/battleship.log'
+    if sys.platform == 'win32':
+        log_dir = os.path.dirname(__file__)+'/battleship.log'
+        logo_path = os.path.dirname(__file__) + "/logo"
+    else:
+        log_dir = os.path.dirname(__file__)+'battleship.log'
+        logo_path = os.path.dirname(__file__) + "logo"
+
     logging.basicConfig(filename=log_dir, level=logging.DEBUG)
     logging.info("GAME WAS STARTED.")
     clear()
 
-    logo_path = os.path.dirname(__file__) + "/logo"
     with open(logo_path) as logo:
         logo_string = [letters for letters in logo]
         input(''.join(logo_string))
