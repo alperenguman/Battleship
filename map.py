@@ -255,7 +255,6 @@ class Map:
 
                 else:
                     selected_ship = value
-                    selected_ship.placed = True
                     self.ship_placed.append(selected_ship)
 
                 placement = input("Where do you want to put your {}?"
@@ -315,10 +314,15 @@ class Map:
 
             else:
                 Map.clear()
-                Map.map_display(self)
+                self.map_display()
                 logging.info("Position {} is marked by {}"
                              " for ship placement.".format(self.ship_positions, self.owner))  # CHANGE LOGGING OF POS
 
+        elif placement.lower() == 'r':
+            self.clear()
+            self.ship_placed.pop()
+            self.remove_ship(selected_ship)
+            self.map_display()
         else:
             Map.clear()
             Map.map_display(self)
