@@ -290,7 +290,8 @@ class Map:
                 logging.info("Position {} is marked by {}"
                              " for ship placement.".format(self.ship_positions, self.owner))  # CHANGE LOGGING OF POS
 
-        elif len(placement) == 3 and placement[0] in list(string.ascii_lowercase)[:self.size]:
+        elif len(placement) == 3 and placement[0] in list(string.ascii_lowercase)[:self.size] and placement[1].lower()\
+                not in list(string.ascii_lowercase) and placement[2] not in list(string.ascii_lowercase):
 
             placement_formatted = (placement[0], int(placement[1]+placement[2]))
 
