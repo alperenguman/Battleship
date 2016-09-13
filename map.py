@@ -318,7 +318,7 @@ class Map:
 
         elif placement.lower() == 'r':
             self.clear()
-            self.ship_placed.pop()
+            self.ship_placed.remove(selected_ship)
             self.remove_ship(selected_ship)
             self.map_display()
             logging.info("{} removed a {} from his/her map.".format(self.owner, selected_ship.name))
