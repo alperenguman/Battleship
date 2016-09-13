@@ -70,6 +70,7 @@ def choose_ship(which_map):
 def game_setup():
 
         player1 = Player()
+        logging.info("Player 1 joined with name {}".format(player1.name))
         clear()
         player1_map = Map(owner=player1.name)
         player1_map.map_display()
@@ -83,6 +84,7 @@ def game_setup():
               " when you're ready to continue".format(player1.name, 'Player 2'))
         clear()
         player2 = Player()
+        logging.info("Player 2 joined with name {}".format(player2.name))
         clear()
         player2_map = Map(owner=player2.name)
         player2_map.map_display()
@@ -205,15 +207,18 @@ def game_loop():
         player2_map.map_display()
         print("{} WINS!".format(player2.name.upper()))
         player1_map.map_display()
+        logging.info("Game ended and {} won.".format(player2.name))
 
     elif player2_taken_hits_sum == ship_sizes_sum:
         player1_map.map_display()
         print("{} WINS!".format(player1.name.upper()))
         player2_map.map_display()
+        logging.info("Game ended and {} won.".format(player1.name))
 
 if __name__ == "__main__":
-
-    logging.basicConfig(filename='battleship.log', level=logging.DEBUG)
+    log_dir = os.path.dirname(__file__)+'/battleship.log'
+    logging.basicConfig(filename=log_dir, level=logging.DEBUG)
+    logging.info("GAME WAS STARTED.")
     clear()
 
     logo_path = os.path.dirname(__file__) + "/logo"

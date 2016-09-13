@@ -1,9 +1,9 @@
-import logging
 import sys
 import os
 import string
 import ship
-import pdb
+import logging
+
 
 class Map:
     owner = None
@@ -257,15 +257,14 @@ class Map:
                     selected_ship = value
                     self.ship_placed.append(selected_ship)
 
-                placement = input("Where do you want to put your {}?"
-                                  " (Type Column/Row i.e C3) ".format(selected_ship.name)).lower()
+                placement = input("Where do you want to put your {}?\n"
+                                  "Type Column/Row (i.e C3) or 'r' to remove: ".format(selected_ship.name)).lower()
 
         if len(placement) == 2 and placement[0] in list(string.ascii_lowercase)[:self.size]\
            and int(placement[1]) < self.size:
 
             placement_formatted = (placement[0], int(placement[1]))
 
-            # REPEATED CODE NEST IN A SEPARATE FUNCTION
             if placement_formatted not in self.coordinates_dict:
                 Map.clear()
                 Map.map_display(self)
@@ -286,19 +285,19 @@ class Map:
             else:
                 Map.clear()
                 Map.map_display(self)
-                logging.info("Position {} is marked by {}"
-                             " for ship placement.".format(self.ship_positions, self.owner))  # CHANGE LOGGING OF POS
+            logging.info("{} placed a {} on {}.".format(self.owner, selected_ship.name, placement_formatted))
 
         elif len(placement) == 3 and placement[0] in list(string.ascii_lowercase)[:self.size] and placement[1].lower()\
                 not in list(string.ascii_lowercase) and placement[2] not in list(string.ascii_lowercase):
 
             placement_formatted = (placement[0], int(placement[1]+placement[2]))
 
-            # REPEATED CODE BELOW NEST IN A SEPARATE FUNCTION
             if placement_formatted not in self.coordinates_dict:
                 Map.clear()
                 Map.map_display(self)
                 print("Out of bounds, try again.")
+                logging.info("{} tried placing a {} on {},"
+                             " but it was out of bounds.".format(self.owner, selected_ship.name, placement_formatted))
                 self.place_ship(ship=selected_ship)
 
             orientation_result = Map.placement_orientation(self, placement_formatted, selected_ship)
@@ -315,18 +314,19 @@ class Map:
             else:
                 Map.clear()
                 self.map_display()
-                logging.info("Position {} is marked by {}"
-                             " for ship placement.".format(self.ship_positions, self.owner))  # CHANGE LOGGING OF POS
+            logging.info("{} placed a {} on {}.".format(self.owner, selected_ship.name, placement_formatted))
 
         elif placement.lower() == 'r':
             self.clear()
             self.ship_placed.pop()
             self.remove_ship(selected_ship)
             self.map_display()
+            logging.info("{} removed a {} from his/her map.".format(self.owner, selected_ship.name))
         else:
             Map.clear()
             Map.map_display(self)
             print("Please check your formatting")
+            logging.info("{} tried erroneously placing a {} to {}.".format(self.owner, selected_ship.name, placement))
             self.place_ship(ship=selected_ship)
 
     def placement_orientation(self, placement, selected_ship):
@@ -372,6 +372,9 @@ class Map:
                 self.coordinates_dict[coordinate] = 'SHIP_H_'+selected_ship.name
                 self.ship_positions.append(coordinate)
 
+            logging.info("{} selected to place their {}"
+                         " horizontally on {}.".format(self.owner, selected_ship.name, placement))
+
         elif orientation == 'v':
 
             y_list = []
@@ -400,7 +403,11 @@ class Map:
                     return 'escape'
                 self.coordinates_dict[coordinate] = 'SHIP_V_'+selected_ship.name
                 self.ship_positions.append(coordinate)
+
+            logging.info("{} selected to place their {}"
+                         " vertically on {}.".format(self.owner, selected_ship.name, placement))
         else:
+            logging.info("{} responded with {} instead of h or v.".format(self.owner, orientation))
             return 'soft_escape'
 
     def placement_check(self, coordinate):
@@ -436,32 +443,41 @@ class Map:
                 if key == coordinate and value[0] == 'A':
                     print("You have previously attacked this coordinate!\n"
                           "Please retry.")
+                    logging.info("An attack was attempted but coordinate"
+                                 " {} on {}'s map was previously attacked.".format(coordinate, self.owner))
                     response = input("Please enter a coordinate: ")
                     self.attack(response)
 
                 elif key == coordinate and value == 'EMPTY':
                     self.coordinates_dict[key] = 'ATTACKED' + '_N'
                     last_event = ["missed", coordinate]
+                    logging.info("Attack on {}'s map  on {} was a miss.".format(self.owner, coordinate))
                 elif key == coordinate and value[7] == 'A':
                     self.coordinates_dict[key] = 'ATTACKED' + '_A'
                     last_event = ["hit", coordinate, "Aircraft Carrier"]
+                    logging.info("{}'s {} took a hit on {}.".format(self.owner, last_event[2], last_event[1]))
                 elif key == coordinate and value[7] == 'B':
                     self.coordinates_dict[key] = 'ATTACKED' + '_B'
                     last_event = ["hit", coordinate, "Battleship"]
+                    logging.info("{}'s {} took a hit on {}.".format(self.owner, last_event[2], last_event[1]))
                 elif key == coordinate and value[7] == 'C':
                     self.coordinates_dict[key] = 'ATTACKED' + '_C'
                     last_event = ["hit", coordinate, "Cruiser"]
+                    logging.info("{}'s {} took a hit on {}.".format(self.owner, last_event[2], last_event[1]))
                 elif key == coordinate and value[7] == 'S':
                     self.coordinates_dict[key] = 'ATTACKED' + '_S'
                     last_event = ["hit", coordinate, "Submarine"]
+                    logging.info("{}'s {} took a hit on {}.".format(self.owner, last_event[2], last_event[1]))
                 elif key == coordinate and value[7] == 'P':
                     self.coordinates_dict[key] = 'ATTACKED' + '_P'
                     last_event = ["hit", coordinate, "Patrol Boat"]
+                    logging.info("{}'s {} took a hit on {}.".format(self.owner, last_event[2], last_event[1]))
 
             return last_event
 
         else:
             print("That's not a valid coordinate.")
+            logging.info("An invalid attack was attempted on {}'s map on {}.".format(self.owner, coordinate))
             response = input("Please enter a coordinate: ")
             self.attack(response)
 
@@ -493,26 +509,31 @@ class Map:
 
         if check_ship.lower() == 'a':
             if a_n == ship.AircraftCarrier.size:
+                logging.info("{}'s {} was sunk.".format(self.owner, ship.AircraftCarrier.name))
                 return 1
             else:
                 return 0
         elif check_ship.lower() == 'b':
             if b_n == ship.Battleship.size:
+                logging.info("{}'s {} was sunk.".format(self.owner, ship.Battleship.name))
                 return 1
             else:
                 return 0
         elif check_ship.lower() == 'c':
             if c_n == ship.Cruiser.size:
+                logging.info("{}'s {} was sunk.".format(self.owner, ship.Cruiser.name))
                 return 1
             else:
                 return 0
         elif check_ship.lower() == 's':
             if s_n == ship.Submarine.size:
+                logging.info("{}'s {} was sunk.".format(self.owner, ship.Submarine.name))
                 return 1
             else:
                 return 0
         elif check_ship.lower() == 'p':
             if p_n == ship.PatrolBoat.size:
+                logging.info("{}'s {} was sunk.".format(self.owner, ship.PatrolBoat.name))
                 return 1
             else:
                 return 0
