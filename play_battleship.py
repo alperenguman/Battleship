@@ -122,16 +122,36 @@ def game_loop():
 
         player2_map.map_display()
 
-        player2_attack = input("\nEnter coordinate to attack:")
+        player2_attack = input("\nEnter coordinate to attack: ")
         last_event = player1_map.attack(player2_attack)
-        while last_event == "failed":
-            clear()
-            player2_map.guess_map_display()
-            print("You made an incorrect input\n"
-                  "for coordinate to attack")
-            player2_map.map_display()
-            player2_attack = input("\nEnter coordinate to attack:")
-            last_event = player1_map.attack(player2_attack)
+        ship_sizes_sum = ship.AircraftCarrier.size + ship.Battleship.size + ship.Cruiser.size + \
+            ship.Ship.size + ship.PatrolBoat.size
+
+        while last_event == "failed" or last_event == "already_attacked" or last_event == "out_of_bounds":
+            if last_event == "failed":
+                clear()
+                player1_map.guess_map_display()
+                print("You made an incorrect input\n"
+                      "for coordinate to attack")
+                player2_map.map_display()
+                player2_attack = input("\nEnter coordinate to attack: ")
+                last_event = player1_map.attack(player2_attack)
+            elif last_event == "already_attacked":
+                clear()
+                player1_map.guess_map_display()
+                print("You specified a coordinate\n"
+                      "that was already attacked.")
+                player2_map.map_display()
+                player2_attack = input("\nEnter coordinate to attack: ")
+                last_event = player1_map.attack(player2_attack)
+            elif last_event == "out_of_bounds":
+                clear()
+                player1_map.guess_map_display()
+                print("You specified a coordinate\n"
+                      "that is out of bounds.")
+                player2_map.map_display()
+                player2_attack = input("\nEnter coordinate to attack: ")
+                last_event = player1_map.attack(player2_attack)
 
         clear()
         player1_map.guess_map_display()
@@ -146,6 +166,10 @@ def game_loop():
                 print("You hit an enemy ship!")
         a_n2, b_n2, c_n2, s_n2, p_n2 = player2_map.sink_check("all")
         player2_map.map_display()
+        player2_taken_hits_sum = a_n2 + b_n2 + c_n2 + s_n2 + p_n2
+        if player2_taken_hits_sum >= ship_sizes_sum:
+            break
+
         input("Please press any key to continue.")
 
         clear()
@@ -158,7 +182,7 @@ def game_loop():
             print("{} above is your enemy's map.\n"
                   "Please select where you want to attack.".format(player1.name))
         elif turn > 1 and last_event[0] == "missed":
-            print("{} missed!".format(player1.name))
+            print("{} missed!".format(player2.name))
         elif turn > 1 and last_event[0] == "hit":
             if player1_map.sink_check(last_event[2][0]):
                 print("{} sunk your {}!!!".format(player2.name, last_event[2]))
@@ -169,16 +193,33 @@ def game_loop():
 
         player1_map.map_display()
 
-        player1_attack = input("\nEnter coordinate to attack:")
+        player1_attack = input("\nEnter coordinate to attack: ")
         last_event = player2_map.attack(player1_attack)
-        while last_event == "failed":
-            clear()
-            player2_map.guess_map_display()
-            print("You made an incorrect input\n"
-                  "for coordinate to attack")
-            player1_map.map_display()
-            player1_attack = input("\nEnter coordinate to attack:")
-            last_event = player2_map.attack(player1_attack)
+        while last_event == "failed" or last_event == "already_attacked" or last_event == "out_of_bounds":
+            if last_event == "failed":
+                clear()
+                player2_map.guess_map_display()
+                print("You made an incorrect input\n"
+                      "for coordinate to attack")
+                player1_map.map_display()
+                player1_attack = input("\nEnter coordinate to attack: ")
+                last_event = player2_map.attack(player1_attack)
+            elif last_event == "already_attacked":
+                clear()
+                player2_map.guess_map_display()
+                print("You specified a coordinate\n"
+                      "that was already attacked.")
+                player1_map.map_display()
+                player1_attack = input("\nEnter coordinate to attack: ")
+                last_event = player2_map.attack(player1_attack)
+            elif last_event == "out_of_bounds":
+                clear()
+                player2_map.guess_map_display()
+                print("You specified a coordinate\n"
+                      "that is out of bounds.")
+                player1_map.map_display()
+                player1_attack = input("\nEnter coordinate to attack: ")
+                last_event = player2_map.attack(player1_attack)
 
         clear()
         player2_map.guess_map_display()
@@ -193,25 +234,39 @@ def game_loop():
                 print("You hit an enemy ship!")
         a_n, b_n, c_n, s_n, p_n = player1_map.sink_check("all")
         player1_map.map_display()
+        player1_taken_hits_sum = a_n + b_n + c_n + s_n + p_n
+        if player1_taken_hits_sum >= ship_sizes_sum:
+            break
         input("Please press any key to continue.")
 
         clear()
         input("Please pass the laptop to {} and press any key to continue.".format(player2_map.owner))
 
-        ship_sizes_sum = ship.AircraftCarrier.size + ship.Battleship.size + ship.Cruiser.size + \
-            ship.Ship.size + ship.PatrolBoat.size
-        player1_taken_hits_sum = a_n + b_n + c_n + s_n + p_n
-        player2_taken_hits_sum = a_n2 + b_n2 + c_n2 + s_n2 + p_n2
-
     if player1_taken_hits_sum == ship_sizes_sum:
+        clear()
         player2_map.map_display()
-        print("{} WINS!".format(player2.name.upper()))
+        print("*"*40)
+        if len(player1.name) % 2 == 0:
+            print("**"+" "*int(15-len(player2.name)/2)+"{} WINS!"
+                  .format(player2.name.upper()) + " "*int(15-len(player2.name)/2)+"**")
+        else:
+            print("**"+" "*int(15-len(player2.name)/2)+"{} WINS!"
+                  .format(player2.name.upper())+" "*int(16-len(player2.name)/2)+"**")
+        print("*"*40)
         player1_map.map_display()
         logging.info("Game ended and {} won.".format(player2.name))
 
     elif player2_taken_hits_sum == ship_sizes_sum:
+        clear()
         player1_map.map_display()
-        print("{} WINS!".format(player1.name.upper()))
+        print("*"*40)
+        if len(player1.name) % 2 == 0:
+            print("**"+" "*int(15-len(player1.name)/2)+"{} WINS!"
+                  .format(player1.name.upper())+" "*int(15-len(player1.name)/2)+"**")
+        else:
+            print("**"+" "*int(15-len(player1.name)/2)+"{} WINS!"
+                  .format(player1.name.upper())+" "*int(16-len(player1.name)/2)+"**")
+        print("*"*40)
         player2_map.map_display()
         logging.info("Game ended and {} won.".format(player1.name))
 

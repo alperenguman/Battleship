@@ -260,6 +260,11 @@ class Map:
                 placement = input("Where do you want to put your {}?\n"
                                   "Type Column/Row (i.e C3) or 'r' to remove: ".format(selected_ship.name)).lower()
 
+        if len(placement)>1 and placement[1] == ' ':
+            placement_l = list(placement)
+            placement_l.pop(1)
+            placement = ''.join(placement_l)
+
         if len(placement) == 2 and placement[0] in list(string.ascii_lowercase)[:self.size]\
            and int(placement[1]) < self.size:
 
@@ -428,10 +433,17 @@ class Map:
 
     def attack(self, coordinate_unformatted):
 
+        if len(coordinate_unformatted) > 1 and coordinate_unformatted[1] == ' ':
+            coordinate_unformatted_l = list(coordinate_unformatted)
+            coordinate_unformatted_l.pop(1)
+            coordinate_unformatted = ''.join(coordinate_unformatted_l)
+
         if len(coordinate_unformatted) == 2 and coordinate_unformatted[0] in list(string.ascii_lowercase)[:self.size]\
            and int(coordinate_unformatted[1]) < self.size:
             coordinate = (coordinate_unformatted[0].lower(), int(coordinate_unformatted[1]))
-        elif len(coordinate_unformatted) == 3 and coordinate_unformatted[0] in list(string.ascii_lowercase)[:self.size]:
+        elif len(coordinate_unformatted) == 3 and coordinate_unformatted[0] in\
+                list(string.ascii_lowercase)[:self.size] and coordinate_unformatted[1].lower() not in \
+                list(string.ascii_lowercase) and coordinate_unformatted[2] not in list(string.ascii_lowercase):
             coordinate = (coordinate_unformatted[0], int(coordinate_unformatted[1]+coordinate_unformatted[2]))
         else:
             return "failed"
@@ -441,12 +453,9 @@ class Map:
             for key, value in self.coordinates_dict.items():
 
                 if key == coordinate and value[0] == 'A':
-                    print("You have previously attacked this coordinate!\n"
-                          "Please retry.")
                     logging.info("An attack was attempted but coordinate"
                                  " {} on {}'s map was previously attacked.".format(coordinate, self.owner))
-                    response = input("Please enter a coordinate: ")
-                    self.attack(response)
+                    return "already_attacked"
 
                 elif key == coordinate and value == 'EMPTY':
                     self.coordinates_dict[key] = 'ATTACKED' + '_N'
@@ -476,10 +485,8 @@ class Map:
             return last_event
 
         else:
-            print("That's not a valid coordinate.")
             logging.info("An invalid attack was attempted on {}'s map on {}.".format(self.owner, coordinate))
-            response = input("Please enter a coordinate: ")
-            self.attack(response)
+            return "out_of_bounds"
 
     def sink_check(self, *args):
 
