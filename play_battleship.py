@@ -164,10 +164,12 @@ def game_loop():
             else:
                 print("Good news {},".format(player2.name))
                 print("You hit an enemy ship!")
+        a_n, b_n, c_n, s_n, p_n = player1_map.sink_check("all")
         a_n2, b_n2, c_n2, s_n2, p_n2 = player2_map.sink_check("all")
         player2_map.map_display()
+        player1_taken_hits_sum = a_n + b_n + c_n + s_n + p_n
         player2_taken_hits_sum = a_n2 + b_n2 + c_n2 + s_n2 + p_n2
-        if player2_taken_hits_sum >= ship_sizes_sum:
+        if player2_taken_hits_sum >= ship_sizes_sum or player1_taken_hits_sum >= ship_sizes_sum:
             break
 
         input("Please press any key to continue.")
@@ -233,9 +235,11 @@ def game_loop():
                 print("Good news {},".format(player1.name))
                 print("You hit an enemy ship!")
         a_n, b_n, c_n, s_n, p_n = player1_map.sink_check("all")
+        a_n2, b_n2, c_n2, s_n2, p_n2 = player2_map.sink_check("all")
         player1_map.map_display()
         player1_taken_hits_sum = a_n + b_n + c_n + s_n + p_n
-        if player1_taken_hits_sum >= ship_sizes_sum:
+        player2_taken_hits_sum = a_n2 + b_n2 + c_n2 + s_n2 + p_n2
+        if player2_taken_hits_sum >= ship_sizes_sum or player1_taken_hits_sum >= ship_sizes_sum:
             break
         input("Please press any key to continue.")
 
@@ -244,7 +248,7 @@ def game_loop():
 
     if player1_taken_hits_sum == ship_sizes_sum:
         clear()
-        player2_map.map_display()
+        player1_map.map_display()
         print("*"*40)
         if len(player1.name) % 2 == 0:
             print("**"+" "*int(15-len(player2.name)/2)+"{} WINS!"
@@ -253,12 +257,12 @@ def game_loop():
             print("**"+" "*int(15-len(player2.name)/2)+"{} WINS!"
                   .format(player2.name.upper())+" "*int(16-len(player2.name)/2)+"**")
         print("*"*40)
-        player1_map.map_display()
+        player2_map.map_display()
         logging.info("Game ended and {} won.".format(player2.name))
 
     elif player2_taken_hits_sum == ship_sizes_sum:
         clear()
-        player1_map.map_display()
+        player2_map.map_display()
         print("*"*40)
         if len(player1.name) % 2 == 0:
             print("**"+" "*int(15-len(player1.name)/2)+"{} WINS!"
@@ -267,7 +271,7 @@ def game_loop():
             print("**"+" "*int(15-len(player1.name)/2)+"{} WINS!"
                   .format(player1.name.upper())+" "*int(16-len(player1.name)/2)+"**")
         print("*"*40)
-        player2_map.map_display()
+        player1_map.map_display()
         logging.info("Game ended and {} won.".format(player1.name))
 
 if __name__ == "__main__":
